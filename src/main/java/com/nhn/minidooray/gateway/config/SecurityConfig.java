@@ -1,5 +1,8 @@
 package com.nhn.minidooray.gateway.config;
 
+import com.nhn.minidooray.gateway.service.impl.OAuth2UserServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,13 +16,21 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    @Value("${com.nhn.minidooray.gateway.config.github.client-id}")
+    private String githubClientId;
+    @Value("${com.nhn.minidooray.gateway.config.github.client-secret}")
+    private String githubClientSecret;
+
+    private final OAuth2UserServiceImpl oAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(a -> a
+        return http.authorizeRequests(a -> a
                         .antMatchers("/account/**").authenticated()
-                        .antMatchers("/project/**").authenticated()
+                        .antMatchers("/project/**").access("@projectAuthChecker.check(httpServletRequest, authentication)")
                         .antMatchers("/redirect-index").authenticated()
                         .anyRequest().permitAll())
                 .requiresChannel(r -> r
@@ -35,7 +46,9 @@ public class SecurityConfig {
                 .formLogin().and()
                 .oauth2Login(o -> o
                         .clientRegistrationRepository(clientRegistrationRepository())
-                        .authorizedClientService(authorizedClientService()))
+                        .authorizedClientService(authorizedClientService())
+                        .userInfoEndpoint(u -> u
+                                .userService(oAuth2UserService)))
                 .logout(l -> l
                         .invalidateHttpSession(true))
                 .csrf().disable()
@@ -60,9 +73,10 @@ public class SecurityConfig {
 
     private ClientRegistration github() {
         return CommonOAuth2Provider.GITHUB.getBuilder("github")
-            .userNameAttributeName("name")
-            .clientId("c5e2dfd873d560fc151e")
-            .clientSecret("a9ae95c45744af282a008086bd8b5fb6918510e6")
-            .build();
+                .userNameAttributeName("name")
+                .clientId(githubClientId)
+                .clientSecret(githubClientSecret)
+                .scope("read:user", "user:email")
+                .build();
     }
 }
