@@ -12,9 +12,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
-// TODO 깃헙 로그인 후) 이메일 조회 후 이메일 있으면 해당 아이디로 로그인, 이메일 없으면 회원가입 시키기
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -26,24 +26,28 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        String id = userRequest.getClientRegistration().getRegistrationId();
-        String userName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-
         String email = oAuth2User.getAttribute("email");
 
-        // https://vesselsdiary.tistory.com/192
-        // TODO 동작 안하면 위 링크 참고하여 변경 할 것
         if (email == null || email.isBlank()) {
-            throw new OAuth2AuthenticationException("email is null or blank");
+            throw new IllegalArgumentException("email is null or blank, 깃허브 이메일을 공개해야 이용 가능합니다.");
         }
+
+        String name = oAuth2User.getAttribute("name");
+
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("name is null or name, 깃허브 이름을 설정 및 공개해야 이용 가능합니다.");
+        }
+
+        Integer id = oAuth2User.getAttribute("id");
+        String loginId = oAuth2User.getAttribute("login");
 
         Account account = accountApiService.getAccountByEmail(email);
 
         if (account == null) {
             account = accountApiService.addAccount(
                     Account.builder()
-                            .id(id)
-                            .name(userName)
+                            .id(loginId + "@" + id)
+                            .name(name)
                             .email(email)
                             .salt("") // TODO
                             .password("") // TODO
@@ -51,13 +55,13 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
             );
         }
 
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        attributes.put("id", account.getId());
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        attributes.put("accountId", account.getId());
 
         return new DefaultOAuth2User(
                 Collections.emptySet(),
                 attributes,
-                "id"
+                "accountId"
         );
     }
 }

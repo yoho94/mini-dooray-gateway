@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +60,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .password(account.getPassword())
                 .disabled(accountStateType.isDisabled())
                 .accountLocked(accountLocked)
+                .authorities(Collections.emptySet())
                 .build();
     }
 }
