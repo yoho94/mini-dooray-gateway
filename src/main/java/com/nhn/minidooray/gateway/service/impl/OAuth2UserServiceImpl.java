@@ -35,7 +35,7 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
         String name = oAuth2User.getAttribute("name");
 
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name is null or name, 깃허브 이름을 설정 및 공개해야 이용 가능합니다.");
+            throw new IllegalArgumentException("name is null or blank, 깃허브 이름을 설정 및 공개해야 이용 가능합니다.");
         }
 
         Integer id = oAuth2User.getAttribute("id");
