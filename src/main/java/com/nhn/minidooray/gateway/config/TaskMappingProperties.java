@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "com.nhn.minidooray.task.mapping")
+@ConfigurationProperties(prefix = "com.nhn.minidooray.mapping.task")
 @Getter
 @Setter
 public class TaskMappingProperties {

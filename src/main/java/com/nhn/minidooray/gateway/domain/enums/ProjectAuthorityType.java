@@ -9,6 +9,16 @@ import java.util.Map;
 public enum ProjectAuthorityType {
     ADMIN("01", "관리자") {
         @Override
+        public Map<PermissionType, Boolean> getProjectAuthority() {
+            return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, true,
+                    PermissionType.MODIFY, true,
+                    PermissionType.DELETE, true
+            );
+        }
+
+        @Override
         public Map<PermissionType, Boolean> getAccountAuthority() {
             return Map.of(
                     PermissionType.LIST, true,
@@ -41,6 +51,16 @@ public enum ProjectAuthorityType {
         }
     },
     MEMBER("02", "멤버") {
+        @Override
+        public Map<PermissionType, Boolean> getProjectAuthority() {
+            return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
+
         @Override
         public Map<PermissionType, Boolean> getAccountAuthority() {
             return Map.of(
@@ -75,6 +95,16 @@ public enum ProjectAuthorityType {
     },
     GUEST("03", "손님") {
         @Override
+        public Map<PermissionType, Boolean> getProjectAuthority() {
+            return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
+
+        @Override
         public Map<PermissionType, Boolean> getAccountAuthority() {
             return Map.of(
                     PermissionType.LIST, true,
@@ -107,6 +137,16 @@ public enum ProjectAuthorityType {
         }
     },
     NONE("04", "없음") {
+        @Override
+        public Map<PermissionType, Boolean> getProjectAuthority() {
+            return Map.of(
+                    PermissionType.READ, false,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
+
         @Override
         public Map<PermissionType, Boolean> getAccountAuthority() {
             return Map.of(
@@ -158,6 +198,8 @@ public enum ProjectAuthorityType {
     public enum PermissionType {
         LIST, READ, WRITE, MODIFY, DELETE
     }
+
+    public abstract Map<PermissionType, Boolean> getProjectAuthority();
 
     public abstract Map<PermissionType, Boolean> getTaskAuthority();
 

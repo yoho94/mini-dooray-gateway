@@ -4,15 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "com.nhn.minidooray.mapping.project-account")
+@ConfigurationProperties(prefix = "com.nhn.minidooray.mapping.project")
 @Getter
 @Setter
-public class ProjectAccountMappingProperties {
+public class ProjectMappingProperties {
     private String prefix;
-
-    private String list;
-    private String read;
-    private String write;
+    private String create;
     private String modify;
     private String delete;
 }

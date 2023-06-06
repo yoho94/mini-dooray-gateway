@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("${com.nhn.minidooray.mapping.project-prefix}/{projectId}${com.nhn.minidooray.project-account.mapping.prefix}")
+@RequestMapping("${com.nhn.minidooray.mapping.project.prefix}/{projectId}${com.nhn.minidooray.mapping.project-account.prefix}")
 public class ProjectAccountController {
-    @GetMapping("${com.nhn.minidooray.project-account.mapping.list}")
-    public String getList(@PathVariable Integer projectId, Model model) {
+    @GetMapping("${com.nhn.minidooray.mapping.project-account.list}")
+    public String getList(@PathVariable Long projectId, Model model) {
         model.addAttribute("projectId", projectId);
         return "project/account/list";
     }

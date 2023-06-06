@@ -22,7 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final AccountApiService accountApiService;
 
     @Value("${com.nhn.minidooray.gateway.dormant_days}")
-    private long dormantDays;
+    private int dormantDays;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -34,7 +34,29 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         AccountStateType accountStateType = AccountStateType.valueOfCode(account.getAccountStateCode());
+
+        if (accountStateType.isDisabled()) {
+            return User.builder()
+                    .username(account.getId())
+                    .password(account.getPassword())
+                    .disabled(true)
+                    .accountLocked(false)
+                    .authorities(Collections.emptySet())
+                    .build();
+        }
+
         LocalDateTime lastLoginAt = account.getLastLoginAt();
+
+        if (lastLoginAt == null) {
+            return User.builder()
+                    .username(account.getId())
+                    .password(account.getPassword())
+                    .disabled(false)
+                    .accountLocked(false)
+                    .authorities(Collections.emptySet())
+                    .build();
+        }
+
         LocalDateTime accountStateChangeAt = account.getAccountStateChangeAt();
 
         long loginDays = Duration.between(lastLoginAt, LocalDateTime.now()).toDays();
@@ -58,7 +80,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return User.builder()
                 .username(account.getId())
                 .password(account.getPassword())
-                .disabled(accountStateType.isDisabled())
+                .disabled(false)
                 .accountLocked(accountLocked)
                 .authorities(Collections.emptySet())
                 .build();
