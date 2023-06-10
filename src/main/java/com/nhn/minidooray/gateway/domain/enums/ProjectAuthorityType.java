@@ -1,5 +1,6 @@
 package com.nhn.minidooray.gateway.domain.enums;
 
+import com.nhn.minidooray.gateway.exception.NoSuchException;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -192,7 +193,7 @@ public enum ProjectAuthorityType {
         return Arrays.stream(values())
                 .filter(projectAuthorityType -> projectAuthorityType.getCode().equals(code))
                 .findAny()
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchException("ProjectAuthorityType"));
     }
 
     public enum PermissionType {

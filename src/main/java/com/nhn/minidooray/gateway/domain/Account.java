@@ -13,16 +13,6 @@ import java.time.LocalDateTime;
 @ToString
 @Generated
 public class Account {
-    /*
-      "id": "exampleID",
-      "password": "securePassword",
-      "name": "Example Name",
-      "email": "example@email.com",
-      "lastLoginAt": null,
-      "createdAt": "2023-06-05T14:28:08",
-      "accountAccountStateCode": "03",
-      "accountAccountStateChangeAt": "2023-06-05T16:25:29"
-     */
     private String id;
     private String password;
     private String name;

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>프로젝트 회원 목록</title>
+    <meta charset="UTF-8">
+    <title>프로젝트 회원 목록</title>
+    <link rel="stylesheet" href="/style.css"/>
 </head>
 <body>
+<th:block th:include="include/topnav.html :: header('project')"/>
+
 <h1>프로젝트 회원 목록</h1>
 <h1 th:text="${projectId}"></h1>
 </body>

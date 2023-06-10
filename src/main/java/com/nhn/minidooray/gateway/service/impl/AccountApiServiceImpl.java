@@ -11,6 +11,7 @@ import com.nhn.minidooray.gateway.service.AccountApiService;
 import com.nhn.minidooray.gateway.util.ApiCallUtil;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,10 +21,12 @@ public class AccountApiServiceImpl implements AccountApiService {
     private final RestTemplate restTemplate;
     private final AccountApiMappingProperties accountApiMappingProperties;
     private final String urlPrefix;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountApiServiceImpl(RestTemplate restTemplate, ApiUrlProperties apiUrlProperties, AccountApiMappingProperties accountApiMappingProperties) {
+    public AccountApiServiceImpl(RestTemplate restTemplate, ApiUrlProperties apiUrlProperties, AccountApiMappingProperties accountApiMappingProperties, PasswordEncoder passwordEncoder) {
         this.restTemplate = restTemplate;
         this.accountApiMappingProperties = accountApiMappingProperties;
+        this.passwordEncoder = passwordEncoder;
 
         urlPrefix = apiUrlProperties.getAccountUrl() + accountApiMappingProperties.getPrefix();
     }
@@ -33,11 +36,11 @@ public class AccountApiServiceImpl implements AccountApiService {
         ApiResultResponse<Account> resultResponse = ApiCallUtil.get(new ParameterizedTypeReference<>() {
         }, restTemplate, urlPrefix + accountApiMappingProperties.getReadAccountById(), id);
 
-        if (resultResponse.getTotalCount() != 1) {
+        if (resultResponse.isEmpty()) {
             throw new NoSuchException("Account Not Found");
         }
 
-        return resultResponse.getResult().get(0);
+        return resultResponse.getFirst();
     }
 
     @Override
@@ -45,23 +48,34 @@ public class AccountApiServiceImpl implements AccountApiService {
         ApiResultResponse<Account> resultResponse = ApiCallUtil.get(new ParameterizedTypeReference<>() {
         }, restTemplate, urlPrefix + accountApiMappingProperties.getReadAccountByEmail(), email);
 
-        if (resultResponse.getTotalCount() != 1) {
+        if (resultResponse.isEmpty()) {
             throw new NoSuchException("Account Not Found");
         }
 
-        return resultResponse.getResult().get(0);
+        return resultResponse.getFirst();
     }
 
     @Override
     public void addAccount(Account account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+
         ApiCallUtil.postWithBody(new ParameterizedTypeReference<ApiResultResponse<Void>>() {
         }, restTemplate, urlPrefix + accountApiMappingProperties.getCreateAccount(), account);
     }
 
     @Override
+    public void updateAccount(Account account) {
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+
+        ApiCallUtil.postWithBody(new ParameterizedTypeReference<ApiResultResponse<Void>>() {
+        }, restTemplate, urlPrefix + accountApiMappingProperties.getUpdateAccount(), account, account.getId());
+    }
+
+    @Override
     public void addAccountState(String id, AccountStateType accountStateType) {
         ApiCallUtil.postWithBody(new ParameterizedTypeReference<ApiResultResponse<Void>>() {
-        }, restTemplate, urlPrefix + accountApiMappingProperties.getCreateAccountState(), AccountStateCreateRequest.builder()
+        }, restTemplate, urlPrefix + accountApiMappingProperties.getCreateAccountState(),
+                AccountStateCreateRequest.builder()
                 .accountId(id)
                 .accountStateCode(accountStateType.getCode())
                 .build());

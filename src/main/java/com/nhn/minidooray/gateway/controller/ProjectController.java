@@ -29,7 +29,7 @@ public class ProjectController {
     public static final String REDIRECT_PROJECT = "redirect:/project";
     private final TaskApiService taskApiService;
 
-    @GetMapping
+    @GetMapping("${com.nhn.minidooray.mapping.project-account.list}")
     public String getProjectList(Authentication authentication, Model model, @PageableDefault Pageable pageable) {
         Page<ProjectResponse> page = taskApiService.getProjectList(authentication, pageable);
 

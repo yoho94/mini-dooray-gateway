@@ -3,7 +3,6 @@ package com.nhn.minidooray.gateway.config;
 import com.nhn.minidooray.gateway.handler.LoginSuccessHandler;
 import com.nhn.minidooray.gateway.service.impl.OAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +12,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -23,21 +21,21 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${com.nhn.minidooray.mapping.account.prefix}")
-    private String accountPrefix;
-
     private final OAuth2UserServiceImpl oAuth2UserService;
     private final ProjectAccountMappingProperties projectAccountMappingProperties;
     private final TaskMappingProperties taskMappingProperties;
     private final CommentMappingProperties commentMappingProperties;
     private final ProjectMappingProperties projectMappingProperties;
+    private final AccountMappingProperties accountMappingProperties;
     private final LoginSuccessHandler loginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         final String projectPrefix = projectMappingProperties.getPrefix();
+        final String accountPrefix = accountMappingProperties.getPrefix();
 
         return http.authorizeRequests(a -> a
+                        .antMatchers(accountPrefix + accountMappingProperties.getWrite()).permitAll()
                         .antMatchers(accountPrefix + "/**").authenticated()
                         // TODO ACCOUNT의 권한에 따라 PROJECT 관리 가능하도록 DB 수정 및 로직 수정 필요
                         .antMatchers(projectPrefix + projectMappingProperties.getModify()).access("@projectAuthChecker.projectAuthCheck(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).MODIFY)")
@@ -72,8 +70,10 @@ public class SecurityConfig {
                 .exceptionHandling(e -> e
                         .accessDeniedPage("/error/403"))
                 .formLogin(h -> h
+                        .loginPage("/login")
                         .successHandler(loginSuccessHandler))
                 .oauth2Login(o -> o
+                        .loginPage("/login")
                         .successHandler(loginSuccessHandler)
                         .userInfoEndpoint(u -> u
                                 .userService(oAuth2UserService)))
@@ -85,12 +85,6 @@ public class SecurityConfig {
                                 .maxSessionsPreventsLogin(false))
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::none))
                 .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
@@ -113,7 +107,7 @@ public class SecurityConfig {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 
         messageSource.setDefaultEncoding("UTF-8"); // 인코딩 설정
-        messageSource.setBasenames("classpath:message/security_message", "classpath:org/springframework/security/messages"); // 커스텀한 properties 파일, security properties 파일 순서대로 설정
+        messageSource.setBasenames("classpath:message/view_message", "classpath:message/security_message", "classpath:org/springframework/security/messages"); // 커스텀한 properties 파일, security properties 파일 순서대로 설정
         return messageSource;
     }
 

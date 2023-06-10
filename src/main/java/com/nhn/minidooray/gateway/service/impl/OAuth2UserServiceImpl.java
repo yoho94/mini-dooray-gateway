@@ -101,7 +101,6 @@ public class OAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserReques
                         .id(loginId + "@" + id)
                         .name(name)
                         .email(email)
-                        .password("") // TODO
                         .build();
 
                 accountApiService.addAccount(account);

@@ -11,6 +11,8 @@ public interface AccountApiService {
 
     void addAccount(Account account);
 
+    void updateAccount(Account account);
+
     void addAccountState(String id, AccountStateType accountStateType);
 
     void updateAccountLastLoginAt(Authentication authentication);

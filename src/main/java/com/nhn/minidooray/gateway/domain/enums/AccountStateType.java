@@ -1,5 +1,6 @@
 package com.nhn.minidooray.gateway.domain.enums;
 
+import com.nhn.minidooray.gateway.exception.NoSuchException;
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -27,6 +28,6 @@ public enum AccountStateType {
         return Arrays.stream(values())
                 .filter(accountStateType -> accountStateType.getCode().equals(code))
                 .findAny()
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchException("AccountStateType"));
     }
 }
