@@ -70,3 +70,11 @@ th, td {
 .error-message {
     color: red;
 }
+
+tr:hover {
+    background-color: #F0D9FF;
+}
+
+tr:hover td {
+    background-color: transparent; /* or #000 */
+}

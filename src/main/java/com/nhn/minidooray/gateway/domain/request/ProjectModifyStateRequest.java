@@ -3,10 +3,13 @@ package com.nhn.minidooray.gateway.domain.request;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.validation.constraints.NotNull;
+
 @Getter
 @Setter
-public class ProjectModifyRequest {
+public class ProjectModifyStateRequest {
+    @NotNull
     private Long projectId;
-    private String projectName;
-    private String projectStateCode;
+    @NotNull
+    private String stateCode;
 }

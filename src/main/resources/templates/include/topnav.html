@@ -6,7 +6,7 @@
 <div th:fragment="header(active)">
     <div class="topnav"
          th:style="${failMsg == null ? 'margin-bottom: 10px' : ''}">
-        <a sec:authorize="!isAuthenticated()" id="login" href="/login" th:text="#{nav.login}"/>
+        <a sec:authorize="!isAuthenticated()" id="login" href="/redirect-index" th:text="#{nav.login}"/>
         <th:block sec:authorize="isAuthenticated()">
             <span th:text="#{nav.hello} + ${#authentication.getName()}" sec:authentication="name"/>
         </th:block>
@@ -21,7 +21,7 @@
     </div>
 
     <div class="failMsg" th:if="${failMsg != null}">
-        <h3 th:text="#{'nav.'+${failMsg}}"></h3>
+        <h3 th:text="${failMsg}"></h3>
     </div>
 
     <script th:inline="javascript">

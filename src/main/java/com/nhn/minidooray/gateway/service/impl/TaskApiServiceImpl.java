@@ -3,17 +3,19 @@ package com.nhn.minidooray.gateway.service.impl;
 import com.nhn.minidooray.gateway.config.ApiUrlProperties;
 import com.nhn.minidooray.gateway.config.ProjectApiMappingProperties;
 import com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType;
+import com.nhn.minidooray.gateway.domain.enums.ProjectStateType;
 import com.nhn.minidooray.gateway.domain.request.ProjectCreateRequest;
 import com.nhn.minidooray.gateway.domain.request.ProjectModifyRequest;
-import com.nhn.minidooray.gateway.domain.response.ApiResultResponse;
-import com.nhn.minidooray.gateway.domain.response.ProjectAccountResponse;
-import com.nhn.minidooray.gateway.domain.response.ProjectResponse;
+import com.nhn.minidooray.gateway.domain.request.ProjectModifyStateRequest;
+import com.nhn.minidooray.gateway.domain.response.*;
+import com.nhn.minidooray.gateway.exception.ApiException;
 import com.nhn.minidooray.gateway.exception.NoSuchException;
 import com.nhn.minidooray.gateway.service.TaskApiService;
 import com.nhn.minidooray.gateway.util.ApiCallUtil;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -39,7 +41,7 @@ public class TaskApiServiceImpl implements TaskApiService {
         }, restTemplate, urlPrefix + projectApiMappingProperties.getGetAccount(), projectId, accountId);
 
         if (apiResultResponse.isEmpty()) {
-            throw new NoSuchException("ProjectAccountResponse Not Found");
+            return ProjectAuthorityType.NONE;
         }
 
         ProjectAccountResponse projectAccountResponse = apiResultResponse.getFirst();
@@ -53,12 +55,41 @@ public class TaskApiServiceImpl implements TaskApiService {
     }
 
     @Override
-    public Long createProject(Authentication authentication, ProjectCreateRequest projectCreateRequest) {
-        return null;
+    public ProjectStateType getProjectStateType(Long projectId) {
+        ApiResultResponse<ProjectResponse> apiResultResponse = ApiCallUtil.get(new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getGetProject(), projectId);
+
+        if (apiResultResponse.isEmpty()) {
+            throw new ApiException();
+        }
+
+        ProjectResponse projectAccountResponse = apiResultResponse.getFirst();
+        String code = projectAccountResponse.getStateCode();
+
+        if (!StringUtils.hasText(code)) {
+            throw new NoSuchException("ProjectStateType.code Not Found");
+        }
+
+        return ProjectStateType.valueOfCode(code);
+    }
+
+    @Override
+    public void createProject(Authentication authentication, ProjectCreateRequest projectCreateRequest) {
+
+        projectCreateRequest.setAccountId(authentication.getName());
+        ApiCallUtil.callWithBody(HttpMethod.POST, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getCreateProject(), projectCreateRequest);
     }
 
     @Override
     public void modifyProject(Authentication authentication, ProjectModifyRequest projectModifyRequest) {
+        ApiCallUtil.callWithBody(HttpMethod.PUT, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getUpdateProject(), projectModifyRequest, projectModifyRequest.getProjectId());
+
+    }
+
+    @Override
+    public void modifyProjectState(Authentication authentication, ProjectModifyStateRequest projectModifyStateRequest) {
 
     }
 
@@ -73,15 +104,44 @@ public class TaskApiServiceImpl implements TaskApiService {
     }
 
     @Override
-    public Page<ProjectResponse> getProjectList(Authentication authentication, Pageable pageable) {
-//        ApiResultResponse<Page<ProjectResponse>> apiResultResponse = ApiCallUtil.get(new ParameterizedTypeReference<>() {
-//        }, restTemplate, urlPrefix + projectApiMappingProperties.getGetAccounts(), );
-//
-//        if (apiResultResponse.isEmpty()) {
-//            throw new WebException("API ERROR", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//
-//        return apiResultResponse.getFirst();
-        return null;
+    public Page<ProjectByAccountResponse> getProjectList(Authentication authentication, Pageable pageable) {
+        ApiResultResponse<RestPageImpl<ProjectByAccountResponse>> apiResultResponse = ApiCallUtil.get(new ParameterizedTypeReference<>() {
+                                                                                                      }, restTemplate, urlPrefix + projectApiMappingProperties.getGetProjectsByAccountId() + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(),
+                authentication.getName());
+
+        if (apiResultResponse.isEmpty()) {
+            throw new ApiException();
+        }
+
+        return apiResultResponse.getFirst();
+    }
+
+
+    @Override
+    public Page<TasksResponse> getTaskList(Long projectId, Pageable pageable) {
+        ApiResultResponse<RestPageImpl<TasksResponse>> apiResultResponse =
+                ApiCallUtil.get(new ParameterizedTypeReference<>() {
+                                }, restTemplate, urlPrefix + projectApiMappingProperties.getGetTasks() + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(),
+                        projectId);
+
+        if (apiResultResponse.isEmpty()) {
+            throw new ApiException();
+        }
+
+        return apiResultResponse.getFirst();
+    }
+
+    @Override
+    public Page<AccountByProjectResponse> getAccountList(Long projectId, Pageable pageable) {
+        ApiResultResponse<RestPageImpl<AccountByProjectResponse>> apiResultResponse =
+                ApiCallUtil.get(new ParameterizedTypeReference<>() {
+                                }, restTemplate, urlPrefix + projectApiMappingProperties.getGetAccounts() + "?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize(),
+                        projectId);
+
+        if (apiResultResponse.isEmpty()) {
+            throw new ApiException();
+        }
+
+        return apiResultResponse.getFirst();
     }
 }

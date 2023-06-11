@@ -1,6 +1,7 @@
 package com.nhn.minidooray.gateway.auth;
 
 import com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType;
+import com.nhn.minidooray.gateway.domain.enums.ProjectStateType;
 import com.nhn.minidooray.gateway.service.TaskApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +42,13 @@ public class ProjectAuthChecker {
             return false;
         }
 
+        ProjectStateType projectStateType = taskApiService.getProjectStateType(projectId);
+
         String id = authentication.getName();
 
         ProjectAuthorityType projectAuthorityType = taskApiService.getProjectAuthorityType(projectId, id);
 
-        return projectAuthorityType.getProjectAuthority().get(checkPermission);
+        return projectAuthorityType.getProjectAuthority(projectStateType).get(checkPermission);
     }
 
     public boolean check(HttpServletRequest request, Authentication authentication,
@@ -73,11 +76,13 @@ public class ProjectAuthChecker {
             return false;
         }
 
+        ProjectStateType projectStateType = taskApiService.getProjectStateType(projectId);
+
         String id = authentication.getName();
 
         ProjectAuthorityType projectAuthorityType = taskApiService.getProjectAuthorityType(projectId, id);
 
-        Method method = ReflectionUtils.findMethod(projectAuthorityType.getClass(), "get" + checkType + "Authority");
+        Method method = ReflectionUtils.findMethod(projectAuthorityType.getClass(), "get" + checkType + "Authority", ProjectStateType.class);
 
         if (method == null) {
             return false;
@@ -85,7 +90,7 @@ public class ProjectAuthChecker {
 
         ReflectionUtils.makeAccessible(method);
 
-        Map<ProjectAuthorityType.PermissionType, Boolean> map = (Map) ReflectionUtils.invokeMethod(method, projectAuthorityType);
+        Map<ProjectAuthorityType.PermissionType, Boolean> map = (Map) ReflectionUtils.invokeMethod(method, projectAuthorityType, projectStateType);
 
         return map.get(checkPermission);
     }

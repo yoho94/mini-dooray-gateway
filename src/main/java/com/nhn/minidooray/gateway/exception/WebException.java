@@ -7,7 +7,7 @@ public class WebException extends RuntimeException {
     private final HttpStatus status;
 
     public WebException(String message, HttpStatus status) {
-        super("error." + message);
+        super(message);
         this.status = status;
     }
 

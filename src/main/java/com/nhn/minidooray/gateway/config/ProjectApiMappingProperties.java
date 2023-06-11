@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class ProjectApiMappingProperties {
     private String prefix;
+    private String getProjectsByAccountId;
     private String createProject;
     private String updateProject;
     private String deleteProject;

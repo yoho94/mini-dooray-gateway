@@ -2,6 +2,7 @@ package com.nhn.minidooray.gateway.controller;
 
 import com.nhn.minidooray.gateway.domain.Account;
 import com.nhn.minidooray.gateway.domain.request.AccountCreateRequest;
+import com.nhn.minidooray.gateway.exception.BadRequestException;
 import com.nhn.minidooray.gateway.service.AccountApiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -28,15 +29,23 @@ public class AccountController {
 
     @PostMapping("${com.nhn.minidooray.mapping.account.write}")
     public String postWrite(@Valid AccountCreateRequest accountCreateRequest,
-                            BindingResult bindingResult) {
+                            BindingResult bindingResult,
+                            Model model) {
 
         if (bindingResult.hasErrors()) {
-            // TODO error 처리
+            // TODO 타임리프에서 bindingresult 받아서 에러 메세지 표기하는거 ..
+            return "account/form";
         }
 
-        accountApiService.addAccount(accountCreateRequest.toAccount());
+        try {
+            accountApiService.addAccount(accountCreateRequest.toAccount());
+        } catch (BadRequestException e) {
+            model.addAttribute("account", new AccountCreateRequest());
+            model.addAttribute("failMsg", e.getMessage());
+            return "account/form";
+        }
 
-        return "redirect:/login";
+        return "redirect:/redirect-index";
     }
     @GetMapping("${com.nhn.minidooray.mapping.account.modify}")
     public String getModifyForm(Authentication authentication, Model model) {
@@ -62,7 +71,7 @@ public class AccountController {
         accountCreateRequest.setId(authentication.getName());
         accountApiService.updateAccount(accountCreateRequest.toAccount());
 
-        return "redirect:/login";
+        return "redirect:/redirect-index";
     }
 
 

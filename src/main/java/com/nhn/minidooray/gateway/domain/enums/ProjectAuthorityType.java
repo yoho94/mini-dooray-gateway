@@ -10,7 +10,7 @@ import java.util.Map;
 public enum ProjectAuthorityType {
     ADMIN("01", "관리자") {
         @Override
-        public Map<PermissionType, Boolean> getProjectAuthority() {
+        public Map<PermissionType, Boolean> getProjectAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, true,
                     PermissionType.WRITE, true,
@@ -20,18 +20,7 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getAccountAuthority() {
-            return Map.of(
-                    PermissionType.LIST, true,
-                    PermissionType.READ, true,
-                    PermissionType.WRITE, true,
-                    PermissionType.MODIFY, true,
-                    PermissionType.DELETE, true
-            );
-        }
-
-        @Override
-        public Map<PermissionType, Boolean> getTaskAuthority() {
+        public Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.LIST, true,
                     PermissionType.READ, true,
@@ -42,7 +31,18 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getCommentAuthority() {
+        public Map<PermissionType, Boolean> getTaskAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, true,
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, true,
+                    PermissionType.MODIFY, true,
+                    PermissionType.DELETE, true
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, true,
                     PermissionType.WRITE, true,
@@ -53,7 +53,7 @@ public enum ProjectAuthorityType {
     },
     MEMBER("02", "멤버") {
         @Override
-        public Map<PermissionType, Boolean> getProjectAuthority() {
+        public Map<PermissionType, Boolean> getProjectAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, true,
                     PermissionType.WRITE, false,
@@ -63,7 +63,7 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getAccountAuthority() {
+        public Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.LIST, true,
                     PermissionType.READ, true,
@@ -74,31 +74,31 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getTaskAuthority() {
+        public Map<PermissionType, Boolean> getTaskAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.LIST, true,
                     PermissionType.READ, true,
-                    PermissionType.WRITE, true,
-                    PermissionType.MODIFY, true,
-                    PermissionType.DELETE, true
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
             );
         }
 
         @Override
-        public Map<PermissionType, Boolean> getCommentAuthority() {
+        public Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, true,
-                    PermissionType.WRITE, true,
-                    PermissionType.MODIFY, false,
-                    PermissionType.DELETE, false
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
             );
         }
     },
     GUEST("03", "손님") {
         @Override
-        public Map<PermissionType, Boolean> getProjectAuthority() {
+        public Map<PermissionType, Boolean> getProjectAuthority(ProjectStateType projectStateType) {
             return Map.of(
-                    PermissionType.READ, true,
+                    PermissionType.READ, projectStateType.isActive(),
                     PermissionType.WRITE, false,
                     PermissionType.MODIFY, false,
                     PermissionType.DELETE, false
@@ -106,9 +106,9 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getAccountAuthority() {
+        public Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType) {
             return Map.of(
-                    PermissionType.LIST, true,
+                    PermissionType.LIST, projectStateType.isActive(),
                     PermissionType.READ, false,
                     PermissionType.WRITE, false,
                     PermissionType.MODIFY, false,
@@ -117,10 +117,10 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getTaskAuthority() {
+        public Map<PermissionType, Boolean> getTaskAuthority(ProjectStateType projectStateType) {
             return Map.of(
-                    PermissionType.LIST, true,
-                    PermissionType.READ, true,
+                    PermissionType.LIST, projectStateType.isActive(),
+                    PermissionType.READ, projectStateType.isActive(),
                     PermissionType.WRITE, false,
                     PermissionType.MODIFY, false,
                     PermissionType.DELETE, false
@@ -128,7 +128,7 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getCommentAuthority() {
+        public Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, false,
                     PermissionType.WRITE, false,
@@ -139,7 +139,7 @@ public enum ProjectAuthorityType {
     },
     NONE("04", "없음") {
         @Override
-        public Map<PermissionType, Boolean> getProjectAuthority() {
+        public Map<PermissionType, Boolean> getProjectAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, false,
                     PermissionType.WRITE, false,
@@ -149,18 +149,7 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getAccountAuthority() {
-            return Map.of(
-                    PermissionType.LIST, false,
-                    PermissionType.READ, false,
-                    PermissionType.WRITE, false,
-                    PermissionType.MODIFY, false,
-                    PermissionType.DELETE, false
-            );
-        }
-
-        @Override
-        public Map<PermissionType, Boolean> getTaskAuthority() {
+        public Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.LIST, false,
                     PermissionType.READ, false,
@@ -171,7 +160,18 @@ public enum ProjectAuthorityType {
         }
 
         @Override
-        public Map<PermissionType, Boolean> getCommentAuthority() {
+        public Map<PermissionType, Boolean> getTaskAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, false,
+                    PermissionType.READ, false,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType) {
             return Map.of(
                     PermissionType.READ, false,
                     PermissionType.WRITE, false,
@@ -200,11 +200,11 @@ public enum ProjectAuthorityType {
         LIST, READ, WRITE, MODIFY, DELETE
     }
 
-    public abstract Map<PermissionType, Boolean> getProjectAuthority();
+    public abstract Map<PermissionType, Boolean> getProjectAuthority(ProjectStateType projectStateType);
 
-    public abstract Map<PermissionType, Boolean> getTaskAuthority();
+    public abstract Map<PermissionType, Boolean> getTaskAuthority(ProjectStateType projectStateType);
 
-    public abstract Map<PermissionType, Boolean> getAccountAuthority();
+    public abstract Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType);
 
-    public abstract Map<PermissionType, Boolean> getCommentAuthority();
+    public abstract Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType);
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>프로젝트 목록</title>
@@ -9,5 +10,91 @@
 <th:block th:include="include/topnav.html :: header('project')"/>
 
 <h1>프로젝트 목록</h1>
+<a href="#"
+   onclick="showCreate()"
+   th:text="'프로젝트 생성'"></a>
+<div id="create-div"
+     style="display: none">
+    <form method="post"
+          th:action="@{${@projectMappingProperties.getCreateUrl()}}">
+        <label>
+            <span>프로젝트 이름 : </span>
+            <input type="text" name="projectName"/>
+        </label>
+
+        <button type="submit">생성</button>
+    </form>
+</div>
+<script>
+    function showCreate() {
+        const div = document.getElementById("create-div");
+
+        div.style.display = div.style.display === "none" ? "" : "none";
+    }
+</script>
+
+<table>
+    <thead>
+    <tr>
+        <th>프로젝트 아이디</th>
+        <th>프로젝트 이름</th>
+        <th>프로젝트 상태</th>
+        <th>프로젝트의 내 권한</th>
+        <th>참가자 보기</th>
+        <th>수정</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="project : ${projectList}">
+        <form method="post"
+              th:action="@{${@environment.getProperty('com.nhn.minidooray.mapping.project.prefix') + @environment.getProperty('com.nhn.minidooray.mapping.project.modify')}}">
+            <td th:text="${project.projectId}"></td>
+            <td>
+                <input type="hidden"
+                       name="projectId"
+                       th:value="${project.projectId}">
+
+                <a th:href="@{${@environment.getProperty('com.nhn.minidooray.mapping.project.prefix') + '/' + project.projectId + @environment.getProperty('com.nhn.minidooray.mapping.task.prefix') + @environment.getProperty('com.nhn.minidooray.mapping.task.list')}} "
+                   th:text="${project.projectName}"></a>
+                &nbsp;
+                <input type="text"
+                       name="projectName"
+                       th:value="${project.projectName}"/>
+            </td>
+            <td>
+                <input type="hidden"
+                       name="projectId"
+                       th:value="${project.projectId}">
+                <select name="projectStateCode">
+                    <option th:each="code : ${T(com.nhn.minidooray.gateway.domain.enums.ProjectStateType).values()}"
+                            th:text="${code.getName()}"
+                            th:value="${code.getCode()}"
+                            th:selected="${project.getProjectStateCode().equals(code.getCode())}">
+
+                    </option>
+                </select>
+            </td>
+
+            <td th:text="${T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType).valueOfCode(project.accountAuthority).getName()}"></td>
+
+            <td>
+                <a th:href="@{${@projectAccountMappingProperties.getListUrl(project.projectId)}}"
+                   th:text="'이동'"></a>
+            </td>
+            <td>
+                <button type="submit">적용</button>
+            </td>
+        </form>
+    </tr>
+    </tbody>
+</table>
+
+<div class="page">
+    <p>Page <span th:text="${page.number}"></span> of <span th:text="${pageCount}"></span></p>
+    <p>Total projects: <span th:text="${totalCount}"></span></p>
+    <th:block th:if="${pageCount > 0}" th:each="i: ${#numbers.sequence(0, (pageCount - 1))}">
+        <a th:href="@{'?page=' + ${i} + '&size=10'} " th:text="${i} + '. '"/>
+    </th:block>
+</div>
 </body>
 </html>
