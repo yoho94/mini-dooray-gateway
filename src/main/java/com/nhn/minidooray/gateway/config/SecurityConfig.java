@@ -50,7 +50,7 @@ public class SecurityConfig {
 
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + taskMappingProperties.getList()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).LIST, 'Task')")
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + taskMappingProperties.getRead()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).READ, 'Task')")
-                        .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + taskMappingProperties.getWrite()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).WRITE, 'Task')")
+                        .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + taskMappingProperties.getWrite()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).WRITE, 'Task')")
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + taskMappingProperties.getModify()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).MODIFY, 'Task')")
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + taskMappingProperties.getDelete()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).DELETE, 'Task')")
 

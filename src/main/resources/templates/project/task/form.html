@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${task.id == null ? '테스크 생성' : '테스크 수정'}"></title>
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('project')"/>
+
+<form method="post"
+      th:object="${task}"
+      th:action="@{${
+      task.id == null ? @taskMappingProperties.getWriteUrl(projectId)
+                      : @taskMappingProperties.getModifyUrl(projectId, task.getId())}}">
+    <table>
+        <tr>
+            <th th:if="${task.id != null}">테스크 번호 :</th>
+            <td th:if="${task.id != null}" th:text="${task.id}"></td>
+            <th th:colspan="${task.id == null ? 2 : 0}">제목 :</th>
+            <td th:colspan="${task.id == null ? 2 : 0}">
+                <input th:field="*{id}"/>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">본문</th>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <textarea th:field="*{content}">
+
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <th>태그</th>
+            <td></td>
+            <th>마일 스톤</th>
+            <td></td>
+        </tr>
+    </table>
+    <input type="submit"/>
+</form>
+</body>
+</html>

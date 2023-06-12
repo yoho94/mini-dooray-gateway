@@ -2,11 +2,10 @@ package com.nhn.minidooray.gateway.service;
 
 import com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType;
 import com.nhn.minidooray.gateway.domain.enums.ProjectStateType;
-import com.nhn.minidooray.gateway.domain.request.ProjectCreateRequest;
-import com.nhn.minidooray.gateway.domain.request.ProjectModifyRequest;
-import com.nhn.minidooray.gateway.domain.request.ProjectModifyStateRequest;
+import com.nhn.minidooray.gateway.domain.request.*;
 import com.nhn.minidooray.gateway.domain.response.AccountByProjectResponse;
 import com.nhn.minidooray.gateway.domain.response.ProjectByAccountResponse;
+import com.nhn.minidooray.gateway.domain.response.TaskResponse;
 import com.nhn.minidooray.gateway.domain.response.TasksResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +28,21 @@ public interface TaskApiService {
 
     Page<ProjectByAccountResponse> getProjectList(Authentication authentication, Pageable pageable);
 
+    Page<AccountByProjectResponse> getAccountList(Long projectId, Pageable pageable);
+
+    void writeAccount(Long projectId, ProjectAccountCreateRequest projectAccountCreateRequest);
+
+    void modifyAccount(Long projectId, String accountId, ProjectAccountModifyRequest projectAccountModifyRequest);
+
+    void deleteAccount(Long projectId, String accountId);
+
     Page<TasksResponse> getTaskList(Long projectId, Pageable pageable);
 
-    Page<AccountByProjectResponse> getAccountList(Long projectId, Pageable pageable);
+    TaskResponse getTask(Long projectId, Long taskId);
+
+    Long writeTask(Long projectId, TaskFormRequest taskFormRequest);
+
+    void modifyTask(Long projectId, TaskFormRequest taskFormRequest);
+
+    void deleteTask(Long projectId, Long taskId);
 }

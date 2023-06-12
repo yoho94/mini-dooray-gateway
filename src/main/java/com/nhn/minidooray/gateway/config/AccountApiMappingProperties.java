@@ -12,6 +12,7 @@ public class AccountApiMappingProperties {
 
     private String createAccount;
     private String readAccountById;
+    private String readAccountsById;
     private String readAccountByEmail;
     private String readAccountList;
     private String updateAccount;

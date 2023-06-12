@@ -2,14 +2,14 @@ package com.nhn.minidooray.gateway.service.impl;
 
 import com.nhn.minidooray.gateway.config.ApiUrlProperties;
 import com.nhn.minidooray.gateway.config.ProjectApiMappingProperties;
+import com.nhn.minidooray.gateway.domain.Account;
 import com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType;
 import com.nhn.minidooray.gateway.domain.enums.ProjectStateType;
-import com.nhn.minidooray.gateway.domain.request.ProjectCreateRequest;
-import com.nhn.minidooray.gateway.domain.request.ProjectModifyRequest;
-import com.nhn.minidooray.gateway.domain.request.ProjectModifyStateRequest;
+import com.nhn.minidooray.gateway.domain.request.*;
 import com.nhn.minidooray.gateway.domain.response.*;
 import com.nhn.minidooray.gateway.exception.ApiException;
 import com.nhn.minidooray.gateway.exception.NoSuchException;
+import com.nhn.minidooray.gateway.service.AccountApiService;
 import com.nhn.minidooray.gateway.service.TaskApiService;
 import com.nhn.minidooray.gateway.util.ApiCallUtil;
 import org.springframework.core.ParameterizedTypeReference;
@@ -21,16 +21,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @Service
 public class TaskApiServiceImpl implements TaskApiService {
 
     private final RestTemplate restTemplate;
     private final ProjectApiMappingProperties projectApiMappingProperties;
     private final String urlPrefix;
+    private final AccountApiService accountApiService;
 
-    public TaskApiServiceImpl(RestTemplate restTemplate, ApiUrlProperties apiUrlProperties, ProjectApiMappingProperties projectApiMappingProperties) {
+    public TaskApiServiceImpl(RestTemplate restTemplate, ApiUrlProperties apiUrlProperties, ProjectApiMappingProperties projectApiMappingProperties, AccountApiService accountApiService) {
         this.restTemplate = restTemplate;
         this.projectApiMappingProperties = projectApiMappingProperties;
+        this.accountApiService = accountApiService;
 
         urlPrefix = apiUrlProperties.getTaskUrl() + projectApiMappingProperties.getPrefix();
     }
@@ -142,6 +146,66 @@ public class TaskApiServiceImpl implements TaskApiService {
             throw new ApiException();
         }
 
+        RestPageImpl<AccountByProjectResponse> page = apiResultResponse.getFirst();
+
+        String[] array = page.getContent().stream()
+                .map(AccountByProjectResponse::getAccountId)
+                .toArray(String[]::new);
+
+        List<Account> accounts = accountApiService.getAccountsById(array);
+
+        return page.map(accountByProjectResponse -> {
+            accounts.stream()
+                    .filter(account -> account.getId().equals(accountByProjectResponse.getAccountId()))
+                    .findAny()
+                    .ifPresent(account -> accountByProjectResponse.setAccountName(account.getName()));
+
+            return accountByProjectResponse;
+        });
+    }
+
+    @Override
+    public void writeAccount(Long projectId, ProjectAccountCreateRequest projectAccountCreateRequest) {
+        ApiCallUtil.callWithBody(HttpMethod.POST, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getCreateAccount(), projectAccountCreateRequest, projectId);
+    }
+
+    @Override
+    public void modifyAccount(Long projectId, String accountId, ProjectAccountModifyRequest projectAccountModifyRequest) {
+        ApiCallUtil.callWithBody(HttpMethod.PUT, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getUpdateAccount(), projectAccountModifyRequest, projectId, accountId);
+    }
+
+    @Override
+    public void deleteAccount(Long projectId, String accountId) {
+        ApiCallUtil.call(HttpMethod.DELETE, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getDeleteAccount(), projectId, accountId);
+    }
+
+    @Override
+    public TaskResponse getTask(Long projectId, Long taskId) {
+        ApiResultResponse<TaskResponse> apiResultResponse = ApiCallUtil.call(HttpMethod.GET, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getGetTask(), projectId, taskId);
+
+        if (apiResultResponse.isEmpty()) {
+            throw new ApiException();
+        }
+
         return apiResultResponse.getFirst();
+    }
+
+    @Override
+    public Long writeTask(Long projectId, TaskFormRequest taskFormRequest) {
+        return null;
+    }
+
+    @Override
+    public void modifyTask(Long projectId, TaskFormRequest taskFormRequest) {
+
+    }
+
+    @Override
+    public void deleteTask(Long projectId, Long taskId) {
+
     }
 }

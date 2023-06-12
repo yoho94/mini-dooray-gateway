@@ -1,10 +1,10 @@
 package com.nhn.minidooray.gateway.controller;
 
-import com.nhn.minidooray.gateway.domain.request.ProjectCreateRequest;
-import com.nhn.minidooray.gateway.domain.request.ProjectModifyRequest;
-import com.nhn.minidooray.gateway.domain.response.ProjectByAccountResponse;
+import com.nhn.minidooray.gateway.config.ProjectMappingProperties;
+import com.nhn.minidooray.gateway.config.TaskMappingProperties;
+import com.nhn.minidooray.gateway.domain.request.TaskFormRequest;
+import com.nhn.minidooray.gateway.domain.response.TaskResponse;
 import com.nhn.minidooray.gateway.domain.response.TasksResponse;
-import com.nhn.minidooray.gateway.exception.RequiredValueException;
 import com.nhn.minidooray.gateway.exception.ValidationFailedException;
 import com.nhn.minidooray.gateway.service.TaskApiService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
 
@@ -23,8 +26,10 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @RequestMapping("${com.nhn.minidooray.mapping.project.prefix}/{projectId}${com.nhn.minidooray.mapping.task.prefix}")
 public class TaskController {
-    public static final String REDIRECT_PROJECT = "redirect:/project";
     private final TaskApiService taskApiService;
+
+    private final ProjectMappingProperties projectMappingProperties;
+    private final TaskMappingProperties taskMappingProperties;
 
     @GetMapping("${com.nhn.minidooray.mapping.task.list}")
     public String getTaskList(Model model, @PageableDefault Pageable pageable, @PathVariable Long projectId) {
@@ -38,58 +43,92 @@ public class TaskController {
         return "project/task/list";
     }
 
-    @GetMapping("${com.nhn.minidooray.mapping.task.read}")
-    public String getTask(Authentication authentication, Model model, @PageableDefault Pageable pageable) {
-        Page<ProjectByAccountResponse> page = taskApiService.getProjectList(authentication, pageable);
+    @GetMapping("/{taskId}${com.nhn.minidooray.mapping.task.read}")
+    public String getTask(@PathVariable Long projectId,
+                          @PathVariable Long taskId,
+                          Model model) {
+        TaskResponse task = taskApiService.getTask(projectId, taskId);
 
-        model.addAttribute("page", page);
-        model.addAttribute("projectList", page.getContent());
-        model.addAttribute("totalCount", page.getTotalElements());
-        model.addAttribute("pageCount", page.getTotalPages());
+        model.addAttribute("task", task);
 
-        return "project/list";
+        return "project/task/read";
+    }
+
+    @GetMapping("${com.nhn.minidooray.mapping.task.write}")
+    public String getCreateTaskForm(@PathVariable Long projectId,
+                                    Model model) {
+
+        model.addAttribute(projectId);
+        model.addAttribute("task", new TaskFormRequest());
+
+        return "project/task/form";
     }
 
     @PostMapping("${com.nhn.minidooray.mapping.task.write}")
-    public String createTask(Authentication authentication, @Valid ProjectCreateRequest projectCreateRequest,
-                                BindingResult bindingResult) {
+    public String createTask(@PathVariable Long projectId,
+                             Authentication authentication,
+                             @Valid TaskFormRequest taskFormRequest,
+                             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new ValidationFailedException(bindingResult);
         }
 
-        taskApiService.createProject(authentication, projectCreateRequest);
+        taskFormRequest.setWriterId(authentication.getName());
+        Long taskId = taskApiService.writeTask(projectId, taskFormRequest);
 
-        return REDIRECT_PROJECT;
+        return redirectTaskRead(projectId, taskId);
     }
 
-    @PostMapping("${com.nhn.minidooray.mapping.task.modify}")
-    public String modifyTask(Authentication authentication, @Valid ProjectModifyRequest projectModifyRequest,
-                                BindingResult bindingResult) {
+    @GetMapping("/{taskId}${com.nhn.minidooray.mapping.task.modify}")
+    public String getModifyTaskForm(@PathVariable Long projectId,
+                                    @PathVariable Long taskId,
+                                    Model model) {
+
+        TaskResponse task = taskApiService.getTask(projectId, taskId);
+
+        model.addAttribute(projectId);
+        model.addAttribute(task);
+
+        return "project/task/form";
+    }
+
+    @PostMapping("/{taskId}${com.nhn.minidooray.mapping.task.modify}")
+    public String modifyTask(@PathVariable Long projectId,
+                             @PathVariable Long taskId,
+                             @Valid TaskFormRequest taskFormRequest,
+                             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new ValidationFailedException(bindingResult);
         }
 
-        taskApiService.modifyProject(authentication, projectModifyRequest);
+        taskFormRequest.setTaskId(taskId);
+        taskApiService.modifyTask(projectId, taskFormRequest);
 
-        return REDIRECT_PROJECT;
+        return redirectTaskRead(projectId, taskId);
     }
 
-    @GetMapping("${com.nhn.minidooray.mapping.task.delete}")
-    public String deleteTask(Authentication authentication, @RequestParam(value = "projectId", required = false) Long projectId) {
+    @GetMapping("/{taskId}${com.nhn.minidooray.mapping.task.delete}")
+    public String deleteTask(@PathVariable Long projectId,
+                             @PathVariable Long taskId) {
 
-        // todo 아래 로직 서비스로 옮기기
-        if (projectId == null) {
-            throw new RequiredValueException("projectId is Null");
-        }
+        taskApiService.deleteTask(projectId, taskId);
 
-        if (projectId <= 0) {
-            throw new RequiredValueException("projectId는 0보다 커야 합니다.");
-        }
+        return redirectTaskList(projectId);
+    }
 
-        taskApiService.deleteProject(authentication, projectId);
+    private String redirectTaskList(Long projectId) {
+        return "redirect:"
+                + projectMappingProperties.getPrefix() + projectId
+                + taskMappingProperties.getPrefix()
+                + taskMappingProperties.getList();
+    }
 
-        return REDIRECT_PROJECT;
+    private String redirectTaskRead(Long projectId, Long taskId) {
+        return "redirect:"
+                + projectMappingProperties.getPrefix() + projectId
+                + taskMappingProperties.getPrefix() + taskId
+                + taskMappingProperties.getRead();
     }
 }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>테스크 조회</title>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('project')"/>
+
+<table>
+  <tr>
+    <th>테스크 번호 : </th>
+    <td th:text="${task.id}"></td>
+    <th>제목 : </th>
+    <td th:text="${task.title}"></td>
+  </tr>
+  <tr>
+    <th>태그 : </th>
+    <td th:text="${task.tagNameList}"></td>
+    <th>마일 스톤 : </th>
+    <td th:text="${task.mileStone.name}"></td>
+  </tr>
+  <tr>
+    <th colspan="4">본문</th>
+  </tr>
+  <tr>
+    <td colspan="4" th:text="${task.content}"></td>
+  </tr>
+  <tr>
+    <th>작성자 : </th>
+    <td th:text="${task.writerId}"></td>
+    <th>작성일 : </th>
+    <td th:text="${task.createAt}"></td>
+  </tr>
+</table>
+
+</body>
+</html>

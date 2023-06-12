@@ -10,6 +10,7 @@
 <th:block th:include="include/topnav.html :: header('project')"/>
 
 <h1>테스크 목록</h1>
+<a th:href="@{${@taskMappingProperties.getWriteUrl(projectId)}}">테스크 생성</a>
 <table>
     <thead>
     <tr>
