@@ -3,13 +3,12 @@ package com.nhn.minidooray.gateway.service;
 import com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType;
 import com.nhn.minidooray.gateway.domain.enums.ProjectStateType;
 import com.nhn.minidooray.gateway.domain.request.*;
-import com.nhn.minidooray.gateway.domain.response.AccountByProjectResponse;
-import com.nhn.minidooray.gateway.domain.response.ProjectByAccountResponse;
-import com.nhn.minidooray.gateway.domain.response.TaskResponse;
-import com.nhn.minidooray.gateway.domain.response.TasksResponse;
+import com.nhn.minidooray.gateway.domain.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 public interface TaskApiService {
     ProjectAuthorityType getProjectAuthorityType(Long projectId, String accountId);
@@ -42,7 +41,9 @@ public interface TaskApiService {
 
     Long writeTask(Long projectId, TaskFormRequest taskFormRequest);
 
-    void modifyTask(Long projectId, TaskFormRequest taskFormRequest);
+    Long modifyTask(Long projectId, TaskFormRequest taskFormRequest);
 
     void deleteTask(Long projectId, Long taskId);
+
+    List<MilestoneByProjectResponse> getAllMileStone(Long projectId);
 }

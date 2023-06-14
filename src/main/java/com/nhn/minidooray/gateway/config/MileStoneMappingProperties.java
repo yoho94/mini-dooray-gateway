@@ -6,12 +6,12 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "com.nhn.minidooray.mapping.task")
+@ConfigurationProperties(prefix = "com.nhn.minidooray.mapping.mile-stone")
 @Getter
 @Setter
 @Component
 @RequiredArgsConstructor
-public class TaskMappingProperties {
+public class MileStoneMappingProperties {
     private final ProjectMappingProperties projectMappingProperties;
 
     private String prefix;
@@ -22,21 +22,9 @@ public class TaskMappingProperties {
     private String modify;
     private String delete;
 
-    public String getWriteUrl(Long projectId) {
+    public String getListUrl(Long projectId) {
         return projectMappingProperties.getPrefix() + "/" + projectId
                 + prefix
-                + write;
-    }
-
-    public String getModifyUrl(Long projectId, Long taskId) {
-        return projectMappingProperties.getPrefix() + "/" + projectId
-                + prefix + "/" + taskId
-                + modify;
-    }
-
-    public String getDeleteUrl(Long projectId, Long taskId) {
-        return projectMappingProperties.getPrefix() + "/" + projectId
-                + prefix + "/" + taskId
-                + delete;
+                + list;
     }
 }

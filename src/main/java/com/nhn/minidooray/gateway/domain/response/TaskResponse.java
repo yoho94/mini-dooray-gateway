@@ -22,4 +22,12 @@ public class TaskResponse {
                 .map(TagByGetTaskResponse::getTagName)
                 .collect(Collectors.joining(","));
     }
+
+    public Long getMileStoneId() {
+        return mileStone == null ? null : mileStone.getId();
+    }
+
+    public String getMileStoneName() {
+        return mileStone == null ? null : mileStone.getName();
+    }
 }

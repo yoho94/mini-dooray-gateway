@@ -25,6 +25,7 @@ public class ProjectApiMappingProperties {
     private String deleteMilestone;
     private String getMilestone;
     private String getMilestones;
+    private String getAllMileStones;
     private String createTag;
     private String updateTag;
     private String deleteTag;

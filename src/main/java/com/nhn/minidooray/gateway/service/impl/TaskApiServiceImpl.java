@@ -196,16 +196,38 @@ public class TaskApiServiceImpl implements TaskApiService {
 
     @Override
     public Long writeTask(Long projectId, TaskFormRequest taskFormRequest) {
-        return null;
+        ApiResultResponse<LongIdResponse> response = ApiCallUtil.callWithBody(HttpMethod.POST, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getCreateTask(), taskFormRequest, projectId);
+
+        if (response.isEmpty()) {
+            throw new ApiException();
+        }
+
+        return response.getFirst().getId();
     }
 
     @Override
-    public void modifyTask(Long projectId, TaskFormRequest taskFormRequest) {
+    public Long modifyTask(Long projectId, TaskFormRequest taskFormRequest) {
+        ApiResultResponse<LongIdResponse> response = ApiCallUtil.callWithBody(HttpMethod.PUT, new ParameterizedTypeReference<>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getUpdateTask(), taskFormRequest, projectId, taskFormRequest.getTaskId());
 
+        if (response.isEmpty()) {
+            throw new ApiException();
+        }
+
+        return response.getFirst().getId();
     }
 
     @Override
     public void deleteTask(Long projectId, Long taskId) {
+        ApiCallUtil.call(HttpMethod.DELETE, new ParameterizedTypeReference<ApiResultResponse<Long>>() {
+        }, restTemplate, urlPrefix + projectApiMappingProperties.getDeleteTask(), projectId, taskId);
+    }
 
+    @Override
+    public List<MilestoneByProjectResponse> getAllMileStone(Long projectId) {
+        return ApiCallUtil.call(HttpMethod.GET, new ParameterizedTypeReference<ApiResultResponse<MilestoneByProjectResponse>>() {
+                }, restTemplate, urlPrefix + projectApiMappingProperties.getGetAllMileStones(), projectId)
+                .getResult();
     }
 }

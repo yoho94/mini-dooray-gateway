@@ -50,6 +50,26 @@ public enum ProjectAuthorityType {
                     PermissionType.DELETE, true
             );
         }
+
+        @Override
+        public Map<PermissionType, Boolean> getTagAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, true,
+                    PermissionType.MODIFY, true,
+                    PermissionType.DELETE, true
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getMileStoneAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, true,
+                    PermissionType.MODIFY, true,
+                    PermissionType.DELETE, true
+            );
+        }
     },
     MEMBER("02", "멤버") {
         @Override
@@ -87,6 +107,28 @@ public enum ProjectAuthorityType {
         @Override
         public Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType) {
             return Map.of(
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getTagAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, true,
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getMileStoneAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, true,
                     PermissionType.READ, true,
                     PermissionType.WRITE, projectStateType.isActive(),
                     PermissionType.MODIFY, projectStateType.isActive(),
@@ -136,6 +178,28 @@ public enum ProjectAuthorityType {
                     PermissionType.DELETE, false
             );
         }
+
+        @Override
+        public Map<PermissionType, Boolean> getTagAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, true,
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getMileStoneAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, true,
+                    PermissionType.READ, true,
+                    PermissionType.WRITE, projectStateType.isActive(),
+                    PermissionType.MODIFY, projectStateType.isActive(),
+                    PermissionType.DELETE, projectStateType.isActive()
+            );
+        }
     },
     NONE("04", "없음") {
         @Override
@@ -179,6 +243,28 @@ public enum ProjectAuthorityType {
                     PermissionType.DELETE, false
             );
         }
+
+        @Override
+        public Map<PermissionType, Boolean> getTagAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, false,
+                    PermissionType.READ, false,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
+
+        @Override
+        public Map<PermissionType, Boolean> getMileStoneAuthority(ProjectStateType projectStateType) {
+            return Map.of(
+                    PermissionType.LIST, false,
+                    PermissionType.READ, false,
+                    PermissionType.WRITE, false,
+                    PermissionType.MODIFY, false,
+                    PermissionType.DELETE, false
+            );
+        }
     };
 
     private final String code;
@@ -207,4 +293,8 @@ public enum ProjectAuthorityType {
     public abstract Map<PermissionType, Boolean> getAccountAuthority(ProjectStateType projectStateType);
 
     public abstract Map<PermissionType, Boolean> getCommentAuthority(ProjectStateType projectStateType);
+
+    public abstract Map<PermissionType, Boolean> getTagAuthority(ProjectStateType projectStateType);
+
+    public abstract Map<PermissionType, Boolean> getMileStoneAuthority(ProjectStateType projectStateType);
 }

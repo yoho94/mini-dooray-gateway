@@ -3,6 +3,7 @@ package com.nhn.minidooray.gateway.controller;
 import com.nhn.minidooray.gateway.config.ProjectMappingProperties;
 import com.nhn.minidooray.gateway.config.TaskMappingProperties;
 import com.nhn.minidooray.gateway.domain.request.TaskFormRequest;
+import com.nhn.minidooray.gateway.domain.response.MilestoneByProjectResponse;
 import com.nhn.minidooray.gateway.domain.response.TaskResponse;
 import com.nhn.minidooray.gateway.domain.response.TasksResponse;
 import com.nhn.minidooray.gateway.exception.ValidationFailedException;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -61,6 +63,9 @@ public class TaskController {
         model.addAttribute(projectId);
         model.addAttribute("task", new TaskFormRequest());
 
+        List<MilestoneByProjectResponse> allMileStone = taskApiService.getAllMileStone(projectId);
+        model.addAttribute("mileStoneList", allMileStone);
+
         return "project/task/form";
     }
 
@@ -88,7 +93,10 @@ public class TaskController {
         TaskResponse task = taskApiService.getTask(projectId, taskId);
 
         model.addAttribute(projectId);
-        model.addAttribute(task);
+        model.addAttribute("task", task);
+
+        List<MilestoneByProjectResponse> allMileStone = taskApiService.getAllMileStone(projectId);
+        model.addAttribute("mileStoneList", allMileStone);
 
         return "project/task/form";
     }
@@ -96,6 +104,7 @@ public class TaskController {
     @PostMapping("/{taskId}${com.nhn.minidooray.mapping.task.modify}")
     public String modifyTask(@PathVariable Long projectId,
                              @PathVariable Long taskId,
+                             Authentication authentication,
                              @Valid TaskFormRequest taskFormRequest,
                              BindingResult bindingResult) {
 
@@ -104,6 +113,7 @@ public class TaskController {
         }
 
         taskFormRequest.setTaskId(taskId);
+        taskFormRequest.setWriterId(authentication.getName());
         taskApiService.modifyTask(projectId, taskFormRequest);
 
         return redirectTaskRead(projectId, taskId);
@@ -120,15 +130,15 @@ public class TaskController {
 
     private String redirectTaskList(Long projectId) {
         return "redirect:"
-                + projectMappingProperties.getPrefix() + projectId
+                + projectMappingProperties.getPrefix() + "/" + projectId
                 + taskMappingProperties.getPrefix()
                 + taskMappingProperties.getList();
     }
 
     private String redirectTaskRead(Long projectId, Long taskId) {
         return "redirect:"
-                + projectMappingProperties.getPrefix() + projectId
-                + taskMappingProperties.getPrefix() + taskId
+                + projectMappingProperties.getPrefix() + "/" + projectId
+                + taskMappingProperties.getPrefix() + "/" + taskId
                 + taskMappingProperties.getRead();
     }
 }

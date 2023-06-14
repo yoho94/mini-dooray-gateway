@@ -19,7 +19,7 @@
     <th>태그 : </th>
     <td th:text="${task.tagNameList}"></td>
     <th>마일 스톤 : </th>
-    <td th:text="${task.mileStone.name}"></td>
+    <td th:text="${task.mileStone == null ? '없음' : task.mileStone.name}"></td>
   </tr>
   <tr>
     <th colspan="4">본문</th>

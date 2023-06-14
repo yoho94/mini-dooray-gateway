@@ -27,6 +27,8 @@ public class SecurityConfig {
     private final CommentMappingProperties commentMappingProperties;
     private final ProjectMappingProperties projectMappingProperties;
     private final AccountMappingProperties accountMappingProperties;
+    private final MileStoneMappingProperties mileStoneMappingProperties;
+    private final TagMappingProperties tagMappingProperties;
     private final LoginSuccessHandler loginSuccessHandler;
 
     @Bean
@@ -58,6 +60,18 @@ public class SecurityConfig {
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + commentMappingProperties.getPrefix() + commentMappingProperties.getWrite()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).WRITE, 'Comment')")
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + commentMappingProperties.getPrefix() + commentMappingProperties.getModify()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).MODIFY, 'Comment')")
                         .antMatchers(projectPrefix + "/*" + taskMappingProperties.getPrefix() + "/*" + commentMappingProperties.getPrefix() + commentMappingProperties.getDelete()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).DELETE, 'Comment')")
+
+                        .antMatchers(projectPrefix + "/*" + tagMappingProperties.getPrefix() + tagMappingProperties.getList()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).LIST, 'Tag')")
+                        .antMatchers(projectPrefix + "/*" + tagMappingProperties.getPrefix() + tagMappingProperties.getRead()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).READ, 'Tag')")
+                        .antMatchers(projectPrefix + "/*" + tagMappingProperties.getPrefix() + tagMappingProperties.getWrite()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).WRITE, 'Tag')")
+                        .antMatchers(projectPrefix + "/*" + tagMappingProperties.getPrefix() + tagMappingProperties.getModify()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).MODIFY, 'Tag')")
+                        .antMatchers(projectPrefix + "/*" + tagMappingProperties.getPrefix() + tagMappingProperties.getDelete()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).DELETE, 'Tag')")
+
+                        .antMatchers(projectPrefix + "/*" + mileStoneMappingProperties.getPrefix() + mileStoneMappingProperties.getList()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).LIST, 'MileStone')")
+                        .antMatchers(projectPrefix + "/*" + mileStoneMappingProperties.getPrefix() + mileStoneMappingProperties.getRead()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).READ, 'MileStone')")
+                        .antMatchers(projectPrefix + "/*" + mileStoneMappingProperties.getPrefix() + mileStoneMappingProperties.getWrite()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).WRITE, 'MileStone')")
+                        .antMatchers(projectPrefix + "/*" + mileStoneMappingProperties.getPrefix() + mileStoneMappingProperties.getModify()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).MODIFY, 'MileStone')")
+                        .antMatchers(projectPrefix + "/*" + mileStoneMappingProperties.getPrefix() + mileStoneMappingProperties.getDelete()).access("@projectAuthChecker.check(request, authentication, T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType.PermissionType).DELETE, 'MileStone')")
 
                         .antMatchers("/project/**").authenticated()
                         .antMatchers("/redirect-index").authenticated()

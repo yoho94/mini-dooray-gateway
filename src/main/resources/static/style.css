@@ -78,3 +78,8 @@ tr:hover {
 tr:hover td {
     background-color: transparent; /* or #000 */
 }
+
+.tagInput:hover {
+    border: 1px solid red;
+    cursor: pointer;
+}

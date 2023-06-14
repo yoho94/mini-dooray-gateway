@@ -33,6 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(username + "Not Found");
         }
 
+        // TODO 이 로직을 account 으로 옮기기
         AccountStateType accountStateType = AccountStateType.valueOfCode(account.getAccountStateCode());
 
         if (accountStateType.isDisabled()) {
