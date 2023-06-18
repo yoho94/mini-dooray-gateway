@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="header(active)">
+    <div class="topnav"
+         th:style="${failMsg == null ? 'margin-bottom: 10px' : ''}">
+        <a sec:authorize="!isAuthenticated()" id="login" href="/redirect-index" th:text="#{nav.login}"/>
+        <th:block sec:authorize="isAuthenticated()">
+            <span th:text="#{nav.hello} + ${#authentication.getName()}" sec:authentication="name"/>
+        </th:block>
+
+        <a id="index" href="/" th:text="#{nav.index}"/>
+        <a id="project" th:href="@{${@environment.getProperty('com.nhn.minidooray.mapping.project.prefix')} + ${@environment.getProperty('com.nhn.minidooray.mapping.project.list')}}" th:text="#{nav.project}"/>
+        <a id="changeLang" href="#" th:text="#{nav.changeLang}"/>
+        <div class="right">
+            <a sec:authorize="isAuthenticated()" id="myAccount" th:href="@{${@environment.getProperty('com.nhn.minidooray.mapping.account.prefix')} + ${@environment.getProperty('com.nhn.minidooray.mapping.account.modify')}}" th:text="#{nav.myAccount}"/>
+            <a sec:authorize="isAuthenticated()" id="logout" href="/logout" th:text="#{nav.logout}"/>
+        </div>
+    </div>
+
+    <div class="failMsg" th:if="${failMsg != null}">
+        <h3 th:text="${failMsg}"></h3>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const activeId = [[${active}]];
+        const a = document.getElementById(activeId);
+        a.classList.add("active");
+        /*]]>*/
+    </script>
+    <script th:inline="javascript">
+        function get_cookie(name) {
+            const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return value ? value[2] : null;
+        }
+
+        const changeLang = document.getElementById("changeLang");
+
+        changeLang.addEventListener("click", ev => {
+            const cookieName = 'org.springframework.web.servlet.i18n.CookieLocaleResolver.LOCALE';
+            const cookie = get_cookie(cookieName);
+            const lang = cookie == null ? 'ko' : cookie === 'ko' ? 'en' : 'ko';
+            document.cookie = cookieName + "=" + lang + "; path=/";
+            window.location.reload();
+        });
+    </script>
+
+</div>

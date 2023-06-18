@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="#{login.title}">Login</title>
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('login')"/>
+
+<h2 th:text="#{login.title}">Login</h2>
+
+<p th:if="${param.error}">
+    <span th:text="${session['SPRING_SECURITY_LAST_EXCEPTION'].message}"></span>
+</p>
+
+<form th:action="@{/login}" method="post">
+    <div>
+        <label for="username" th:text="#{login.username}"></label>
+        <input type="text" id="username" name="username" required autofocus/>
+    </div>
+    <div>
+        <label for="password" th:text="#{login.password}"></label>
+        <input type="password" id="password" name="password" required/>
+    </div>
+    <button type="submit" th:text="#{login.button}"></button>
+</form>
+
+<a href="/oauth2/authorization/github" th:text="#{login.github}">GitHub</a>
+<a th:href="@{${@environment.getProperty('com.nhn.minidooray.mapping.account.prefix')} + ${@environment.getProperty('com.nhn.minidooray.mapping.account.write')}}" th:text="#{login.register}"></a>
+</body>
+</html>

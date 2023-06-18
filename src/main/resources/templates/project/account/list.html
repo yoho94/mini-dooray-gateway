@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 참가자 목록</title>
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('project')"/>
+
+<h1>프로젝트 참가자 목록</h1>
+<a href="#"
+   onclick="showCreate()"
+   th:text="'참가자 추가'"></a>
+<div id="create-div"
+     style="display: none">
+    </form>
+    <table>
+        <thead>
+        <tr>
+            <th>회원 아이디</th>
+            <th>회원 이름</th>
+            <th>부여할 권한</th>
+            <th>추가</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        <tr th:each="account, idx : ${accountList}">
+            <form method="post" th:id="${'account-write-form' + idx.count}"
+                  th:action="@{${@projectAccountMappingProperties.getWriteUrl(projectId)}}">
+            </form>
+            <input type="hidden"
+                   th:form="${'account-write-form' + idx.count}"
+                   name="accountId"
+                   th:value="${account.id}">
+            <td th:text="${account.id}"></td>
+            <td th:text="${account.name}"></td>
+            <td>
+                <select name="authorityCode"
+                        th:form="${'account-write-form' + idx.count}"
+                        id="authorityCode">
+                    <option th:each="code : ${T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType).values()}"
+                            th:text="${code.getName()}"
+                            th:value="${code.getCode()}"
+                            th:if="${code.getCode() != '04'}">
+                    </option>
+                </select>
+            </td>
+            <td>
+                <button type="submit"
+                        th:form="${'account-write-form' + idx.count}">추가
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="page">
+        <th:block th:if="${accountPageCount > 0}" th:each="i: ${#numbers.sequence(0, (accountPageCount - 1))}">
+            <a href="#none"
+               th:onclick="'getAccounts(' + ${i} + ')'"
+               th:text="${i} + '. '"/>
+        </th:block>
+        <p>Total 회원: <span th:text="${accountTotalCount}"></span></p>
+    </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const authorityCodeHtml = document.getElementById("authorityCode").innerHTML;
+
+        async function getAccounts(page) {
+            const response = await fetch("list-account?page=" + page + "&size=5");
+
+            const json = await response.json();
+
+            const tbody = document.getElementById("tbody");
+
+            let html = '';
+
+            for (let i = 0; i < json.content.length; i++) {
+                const account = json.content[i];
+                html += `
+                <tr>
+                    <form method="post" id="account-write-form${i}"
+                          action=[[@{${@projectAccountMappingProperties.getWriteUrl(projectId)}}]]>
+                    </form>
+                    <input type="hidden"
+                           form="account-write-form${i}" name="accountId" value="${account.id}">
+                    <td>${account.id}</td>
+                    <td>${account.name}</td>
+                    <td>
+                    <select name="authorityCode"
+                            form="account-write-form${i}">
+                            ${authorityCodeHtml}
+                    </select>
+                    </td>
+                    <td>
+                        <button type="submit" form="account-write-form${i}">추가</button>
+                    </td>
+                </tr>
+            `;
+            }
+
+            tbody.innerHTML = html;
+
+        }
+
+        /*]]>*/
+    </script>
+</div>
+<script>
+    function showCreate() {
+        const div = document.getElementById("create-div");
+
+        div.style.display = div.style.display === "none" ? "" : "none";
+    }
+</script>
+
+
+<table>
+    <thead>
+    <tr>
+        <th>참가자 아이디</th>
+        <th>참가자 이름</th>
+        <th>참가자 권한</th>
+        <th>수정 및 삭제</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="account, idx : ${projectAccountList}">
+        <form method="post"
+              th:id="'account-modify-form' + ${idx.count}"
+              th:action="@{${@projectAccountMappingProperties.getModifyUrl(projectId)}}">
+        </form>
+        <input type="hidden" name="accountId" th:value="${account.accountId}"
+               th:form="'account-modify-form' + ${idx.count}"/>
+        <td th:text="${account.accountId}"></td>
+        <td th:text="${account.accountName}"></td>
+        <td>
+            <select name="authorityCode"
+                    th:form="${'account-modify-form' + idx.count}">
+                <option th:each="code : ${T(com.nhn.minidooray.gateway.domain.enums.ProjectAuthorityType).values()}"
+                        th:text="${code.getName()}"
+                        th:value="${code.getCode()}"
+                        th:if="${code.getCode() != '04'}"
+                        th:selected="${code.getCode().equals(account.getAuthorityCode())}">
+                </option>
+            </select>
+        </td>
+        <td>
+            <button type="submit"
+                    th:form="'account-modify-form' + ${idx.count}">수정
+            </button>
+            <button type="button"
+                    th:onclick="'action(\'' + @{${@projectAccountMappingProperties.getDeleteUrl(projectId)} + '?accountId=' + ${account.accountId}} + '\')'">
+                삭제
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script th:inline="javascript">
+    function action(url) {
+        location.href = url;
+    }
+</script>
+
+<div class="page">
+    <p>Page <span th:text="${page.number}"></span> of <span th:text="${pageCount}"></span></p>
+    <p>Total 참가자: <span th:text="${totalCount}"></span></p>
+    <th:block th:if="${pageCount > 0}" th:each="i: ${#numbers.sequence(0, (pageCount - 1))}">
+        <a th:href="@{'?page=' + ${i} + '&size=10'} " th:text="${i} + '. '"/>
+    </th:block>
+</div>
+</body>
+</html>

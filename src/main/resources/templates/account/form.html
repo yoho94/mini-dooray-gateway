@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${account.id == null ? '회원가입' : '내정보'}">회원가입</title>
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('myAccount')"/>
+
+<h1 th:text="${account.id == null ? '회원가입' : '내정보'}">회원가입</h1>
+<form action="#" th:action="@{${
+account.id == null ? @environment.getProperty('com.nhn.minidooray.mapping.account.prefix') + @environment.getProperty('com.nhn.minidooray.mapping.account.write')
+                   : @environment.getProperty('com.nhn.minidooray.mapping.account.prefix') + @environment.getProperty('com.nhn.minidooray.mapping.account.modify')}}"
+      th:object="${account}" method="post">
+    <label for="id">사용자 이름:</label>
+    <th:block th:if="${account.id == null}">
+        <input type="text" id="id" th:field="*{id}" required><br><br>
+    </th:block>
+    <th:block th:if="${account.id != null}">
+        <span th:text="*{id}"></span><br><br>
+    </th:block>
+    <label for="password">비밀번호:</label>
+    <input type="password" id="password" th:field="*{password}" required><br><br>
+    <label for="name">이름:</label>
+    <input type="text" id="name" th:field="*{name}" required><br><br>
+    <label for="email">이메일:</label>
+    <input type="email" id="email" th:field="*{email}" required><br><br>
+    <button type="submit" th:text="${account.id == null ? '가입' : '수정'}">가입</button>
+</form>
+</body>
+</html>

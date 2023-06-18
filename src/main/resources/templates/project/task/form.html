@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${task.id == null ? '테스크 생성' : '테스크 수정'}"></title>
+    <link rel="stylesheet" href="/style.css"/>
+</head>
+<body>
+<th:block th:include="include/topnav.html :: header('project')"/>
+
+<form method="post"
+      th:object="${task}"
+      th:action="@{${
+      task.id == null ? @taskMappingProperties.getWriteUrl(projectId)
+                      : @taskMappingProperties.getModifyUrl(projectId, task.getId())}}">
+    <table>
+        <tr>
+            <th:block th:if="${task.id != null}">
+                <th>테스크 번호 :</th>
+                <td th:text="${task.id}"></td>
+                <input type="hidden" th:field="*{id}"/>
+            </th:block>
+            <th th:colspan="${task.id == null ? 2 : 0}">제목 :</th>
+            <td th:colspan="${task.id == null ? 2 : 0}">
+                <input th:field="*{title}"/>
+            </td>
+        </tr>
+        <tr>
+            <th colspan="4">본문</th>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <textarea th:field="*{content}">
+
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <th>태그</th>
+            <td id="tagList-td">
+
+            </td>
+            <th>마일 스톤</th>
+            <td id="mileStone-td">
+                <select name="mileStoneId"
+                        th:each="mileStone, idx: ${mileStoneList}">
+                    <option th:if="${idx.first}"
+                            th:value="${null}">선택</option>
+                    <option th:text="${mileStone.milestoneId + ' : ' + mileStone.milestoneName}"
+                            th:value="${mileStone.milestoneId}"
+                            th:selected="${task.getMileStoneId() == mileStone.milestoneId}">
+
+                    </option>
+                </select>
+            </td>
+        </tr>
+    </table>
+    <input type="hidden" th:field="${projectId}">
+    <input type="submit"/>
+</form>
+<label>
+    <span>태그 추가 : </span><input id="tag" type="text"/>
+    <button onclick="addTag()">추가</button>
+</label>
+<script>
+    function addTag() {
+        const tag = document.getElementById("tag").value;
+
+        if (!tag) {
+            return;
+        }
+
+        const td = document.getElementById("tagList-td");
+
+        let html = td.innerHTML;
+
+        html += `
+            <input class="tagInput"
+            onclick="this.remove()"
+            readonly
+            type="text"
+            name="tagNameList" value="${tag}"/>
+        `;
+
+        td.innerHTML = html;
+
+        document.getElementById("tag").value = "";
+    }
+
+    function showMileStone() {
+        window.open(
+            "[[${@mileStoneMappingProperties.getListUrl(projectId)}]]"
+        );
+    }
+</script>
+</body>
+</html>
